@@ -1,14 +1,14 @@
 import dgl
 import torch
-from dgl import DropEdge
+from dgl import NodeShuffle
 
 from GCL.augmentation.augmentor import Augmentor
 
 
-class DropEdgeAug(Augmentor):
-    def __init__(self, prob=0.5):
+class ShuffleNodeAug(Augmentor):
+    def __init__(self):
         super().__init__()
-        self.transform = DropEdge(prob)
+        self.transform = NodeShuffle()
 
     def augment(self, graph: dgl.DGLGraph) -> dgl.DGLGraph:
         return self.transform(graph)
@@ -16,7 +16,8 @@ class DropEdgeAug(Augmentor):
 
 if __name__ == '__main__':
     g = dgl.rand_graph(20, 40)
-    aug = DropEdgeAug(0.1)
+    g.ndata['feat'] = torch.arange(100).view(20, -1)
+    aug = ShuffleNodeAug()
     new_g = aug(g)
-    print(torch.vstack([*new_g.edges()]), new_g.num_edges())
-    print(torch.vstack([*g.edges()]), g.num_edges())
+    print(g.ndata['feat'])
+    print(new_g.ndata['feat'])
