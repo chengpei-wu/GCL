@@ -1,0 +1,1 @@
+A Python library for graph contrastive learning based on [Depp Graph Library (DGL)](https://github.com/dmlc/dgl)

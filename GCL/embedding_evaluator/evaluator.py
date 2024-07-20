@@ -70,7 +70,7 @@ class LREvaluator(Evaluator):
                 outputs = model(train_x)
                 train_loss = loss_fn(outputs, train_y)
 
-                train_loss.backward()
+                train_loss.backward(retain_graph=True)
                 optimizer.step()
                 scheduler.step()
 
@@ -86,7 +86,7 @@ class LREvaluator(Evaluator):
                 pbar.set_postfix(epoch_performance)
                 pbar.update(1)
 
-        return performances, [np.max(performances[measure]) for measure in self.measures]
+        return performances, {measure: np.max(performances[measure]) for measure in self.measures}
 
 
 class SVCEvaluator(Evaluator):
