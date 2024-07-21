@@ -43,9 +43,13 @@ class InfoGraphContrast(nn.Module):
         pos_mask = torch.zeros((h.size(0), g_h.size(0))).to(device)
         neg_mask = torch.ones((h.size(0), g_h.size(0))).to(device)
 
-        for nodeidx, graphidx in enumerate(batch_graph_id):
-            pos_mask[nodeidx][graphidx] = 1.0
-            neg_mask[nodeidx][graphidx] = 0.0
+        for i in range(g_h.size(0)):
+            pos_mask[:, i][batch_graph_id == i] = 1.0
+            neg_mask[:, i][batch_graph_id == i] = 0.0
+
+        # for nodeidx, graphidx in enumerate(batch_graph_id):
+        #     pos_mask[nodeidx][graphidx] = 1.0
+        #     neg_mask[nodeidx][graphidx] = 0.0
 
         similarity_score = torch.mm(lh, gh.t())
 
