@@ -26,8 +26,8 @@ if __name__ == '__main__':
         optimizer.step()
         print(f'epoch: {epoch}, training loss: {loss.item()}')
 
-    # test DGI-learned node embedding on Logistic Regression model using transductive setting
-    embedding = DGI.get_embedding(g)
+    # test DGI-learned node embeddings on Logistic Regression model using transductive setting
+    embeddings = DGI.get_embedding(g)
     evaluator = LREvaluator(measures=['accuracy'])
     masks = {
         'train': g.ndata["train_mask"],
@@ -35,5 +35,5 @@ if __name__ == '__main__':
         'test':  g.ndata["test_mask"],
     }
     # masks = train_test_split(embedding.size(0), test_size=0.8)
-    _, best_performance = evaluator(embedding, g.ndata["label"], masks=masks)
+    _, best_performance = evaluator(embeddings, g.ndata["label"], masks=masks)
     print(best_performance)

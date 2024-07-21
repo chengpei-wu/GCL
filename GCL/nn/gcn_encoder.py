@@ -8,15 +8,13 @@ from GCL.nn.utils import readout_map
 
 
 class GCNEncoder(nn.Module):
-    def __init__(self, in_size, out_size, hid_size=16, num_layers=1, activation=F.relu, level='node',
+    def __init__(self, in_size, hid_size=16, num_layers=1, activation=F.relu, level='node',
             pool: str = 'mean'):
         super(GCNEncoder, self).__init__()
         self.layers = nn.ModuleList()
         self.rep_level = level
         if self.rep_level == 'graph':
             self.readout = readout_map(pool)
-        if num_layers == 1:
-            hid_size = out_size
 
         for i in range(num_layers):
             if i == 0:
@@ -24,10 +22,6 @@ class GCNEncoder(nn.Module):
                     GraphConv(
                         in_size, hid_size, allow_zero_in_degree=True, activation=activation
                     )
-                )
-            elif i == num_layers - 1:
-                self.layers.append(
-                    GraphConv(hid_size, out_size, allow_zero_in_degree=True, activation=activation)
                 )
             else:
                 self.layers.append(
