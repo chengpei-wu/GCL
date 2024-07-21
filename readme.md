@@ -1,1 +1,3 @@
-A Python library for graph contrastive learning based on [Depp Graph Library (DGL)](https://github.com/dmlc/dgl)
+# GCL
+A Python library for graph contrastive learning (GCL) method reproduction, based
+on [Deep Graph Library (DGL)](https://github.com/dmlc/dgl)
