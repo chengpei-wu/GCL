@@ -1,7 +1,6 @@
 import dgl
 import torch
 import torch.nn as nn
-from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 from GCL.augmentation.augmentor import Compose
 from GCL.augmentation.drop_edge import DropEdgeAug
@@ -18,8 +17,14 @@ class GracePipeline(nn.Module):
             p_d1: float, p_m1: float, p_d2: float, p_m2: float, tau: float
     ):
         super(GracePipeline, self).__init__()
-        self.augmentor1 = Compose([DropEdgeAug(prob=p_d1), MaskingFeatureAug('feat', prob=p_m1)])
-        self.augmentor2 = Compose([DropEdgeAug(prob=p_d2), MaskingFeatureAug('feat', prob=p_m2)])
+        self.augmentor1 = Compose([
+            DropEdgeAug(prob=p_d1),
+            MaskingFeatureAug('feat', prob=p_m1)
+        ])
+        self.augmentor2 = Compose([
+            DropEdgeAug(prob=p_d2),
+            MaskingFeatureAug('feat', prob=p_m2)
+        ])
         self.encoder = GCNEncoder(in_size=feat_size, embed_size=embed_dim, num_layers=2)
         self.contrast = GraceContrast(embed_dim=embed_dim, proj_dim=proj_dim, loss=InfoNCE(tau=tau))
 
@@ -44,16 +49,15 @@ if __name__ == '__main__':
     dataset = dgl.data.CoraGraphDataset()
     num_classes = dataset.num_classes
     g = dataset[0].to(device)
-    g = dgl.add_self_loop(g)
     Grace = GracePipeline(
-        feat_size=g.ndata["feat"].shape[1], embed_dim=256, proj_dim=1024,
-        p_d1=0.2, p_m1=0.2, p_d2=0.2, p_m2=0.2, tau=0.5
+        feat_size=g.ndata["feat"].shape[1], embed_dim=256, proj_dim=256,
+        p_d1=0.2, p_m1=0.2, p_d2=0.2, p_m2=0.2, tau=1
     ).to(device)
 
     # train GRACE
-    optimizer = torch.optim.Adam(Grace.parameters(), lr=0.001, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(Grace.parameters(), lr=0.0005, weight_decay=1e-5)
 
-    for epoch in range(10000):
+    for epoch in range(300):
         optimizer.zero_grad()
 
         loss = Grace(g)
@@ -63,6 +67,7 @@ if __name__ == '__main__':
         print(f'epoch: {epoch}, training loss: {loss.item()}')
 
     # test GRACE embedding
+    g = dgl.add_self_loop(g)
     embedding = Grace.get_embedding(g)
     print(embedding)
     evaluator = LREvaluator(measures=['macro_f1'])

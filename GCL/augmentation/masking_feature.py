@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import dgl
 import torch
 from dgl import FeatMask
@@ -13,7 +15,7 @@ class MaskingFeatureAug(Augmentor):
         self.transform = FeatMask(p=prob, node_feat_names=[feature_field])
 
     def augment(self, graph: dgl.DGLGraph) -> dgl.DGLGraph:
-        return self.transform(graph)
+        return self.transform(deepcopy(graph))
 
 
 if __name__ == '__main__':

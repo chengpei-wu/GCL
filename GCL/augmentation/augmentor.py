@@ -23,6 +23,5 @@ class Compose(Augmentor):
 
     def augment(self, graph: dgl.DGLGraph) -> dgl.DGLGraph:
         for aug in self.augmentors:
-            graph = aug.augment(graph)
-        # graph = dgl.add_self_loop(graph)
+            graph = aug(graph)
         return graph
