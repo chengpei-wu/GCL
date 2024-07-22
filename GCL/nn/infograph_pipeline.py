@@ -11,7 +11,7 @@ class InfoGraphPipeline(nn.Module):
     def __init__(self, feat_size: int, embed_dim: int):
         super(InfoGraphPipeline, self).__init__()
         self.encoder = GINEncoder(in_size=feat_size, hid_size=embed_dim, num_layers=1)
-        self.contrast = InfoGraphContrast(h_dim=embed_dim, loss=JSD())
+        self.contrast = InfoGraphContrast(embed_dim=embed_dim, loss=JSD())
 
     def forward(self, batch_graph: dgl.DGLGraph, feat='feat'):
         global_h, local_h = self.encoder(batch_graph, batch_graph.ndata[feat])

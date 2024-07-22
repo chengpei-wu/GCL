@@ -11,8 +11,8 @@ class DGIPipeline(nn.Module):
     def __init__(self, feat_size: int, embed_dim: int):
         super(DGIPipeline, self).__init__()
         self.augmentor = ShuffleNodeAug()
-        self.encoder = GCNEncoder(in_size=feat_size, hid_size=embed_dim, num_layers=1)
-        self.contrast = DGIContrast(h_dim=embed_dim, loss=nn.BCEWithLogitsLoss())
+        self.encoder = GCNEncoder(in_size=feat_size, embed_size=embed_dim, num_layers=1)
+        self.contrast = DGIContrast(embed_dim=embed_dim, loss=nn.BCEWithLogitsLoss())
 
     def forward(self, graph: dgl.DGLGraph, feat='feat'):
         g1 = graph.clone()

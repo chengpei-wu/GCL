@@ -11,7 +11,7 @@ class DropEdgeAug(Augmentor):
         self.transform = DropEdge(prob)
 
     def augment(self, graph: dgl.DGLGraph) -> dgl.DGLGraph:
-        return self.transform(graph)
+        return dgl.add_self_loop(self.transform(graph))
 
 
 if __name__ == '__main__':

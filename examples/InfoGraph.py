@@ -13,7 +13,7 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     # load dataset
-    dataset = GINDataset('IMDBBINARY', self_loop=True)
+    dataset = GINDataset('MUTAG', self_loop=True)
     dataloader = GraphDataLoader(dataset, batch_size=128)
 
     # InfoGraph pipeline

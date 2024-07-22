@@ -45,7 +45,7 @@ class GINEncoder(nn.Module):
         h = feats
         hs = []
         for i in range(self.num_layers):
-            h = F.relu(self.gin_layers[i](graph, h))
+            h = self.gin_layers[i](graph, h)
             h = self.batch_norms[i](h)
             hs.append(h)
 

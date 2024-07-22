@@ -6,9 +6,9 @@ from dgl.nn.pytorch import SumPooling
 from GCL.contrastive_loss.jsd import JSD
 
 
-class Discriminator(nn.Module):
+class InfoGraphDiscriminator(nn.Module):
     def __init__(self, h_dim):
-        super(Discriminator, self).__init__()
+        super(InfoGraphDiscriminator, self).__init__()
         self.block = nn.Sequential(
             nn.Linear(h_dim, h_dim),
             nn.ReLU(),
@@ -28,11 +28,11 @@ class Discriminator(nn.Module):
 
 
 class InfoGraphContrast(nn.Module):
-    def __init__(self, h_dim: int, loss: nn.Module = JSD()):
+    def __init__(self, embed_dim: int, loss: nn.Module = JSD()):
         super(InfoGraphContrast, self).__init__()
         self.loss_func = loss
-        self.local_discriminator = Discriminator(h_dim)
-        self.global_discriminator = Discriminator(h_dim)
+        self.local_discriminator = InfoGraphDiscriminator(embed_dim)
+        self.global_discriminator = InfoGraphDiscriminator(embed_dim)
 
     def forward(self, h: torch.Tensor, g_h: torch.Tensor, batch_graph_id: torch.Tensor) -> torch.Tensor:
         device = h.device
@@ -46,10 +46,6 @@ class InfoGraphContrast(nn.Module):
         for i in range(g_h.size(0)):
             pos_mask[:, i][batch_graph_id == i] = 1.0
             neg_mask[:, i][batch_graph_id == i] = 0.0
-
-        # for nodeidx, graphidx in enumerate(batch_graph_id):
-        #     pos_mask[nodeidx][graphidx] = 1.0
-        #     neg_mask[nodeidx][graphidx] = 0.0
 
         similarity_score = torch.mm(lh, gh.t())
 

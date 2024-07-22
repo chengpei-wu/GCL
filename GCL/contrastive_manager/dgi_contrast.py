@@ -2,9 +2,9 @@ import torch
 from torch import nn
 
 
-class Discriminator(nn.Module):
+class DGIDiscriminator(nn.Module):
     def __init__(self, h_dim):
-        super(Discriminator, self).__init__()
+        super(DGIDiscriminator, self).__init__()
         self.weight = nn.Bilinear(h_dim, h_dim, 1)
 
     def forward(self, s, h):
@@ -14,10 +14,10 @@ class Discriminator(nn.Module):
 
 
 class DGIContrast(nn.Module):
-    def __init__(self, h_dim: int, loss: nn.Module):
+    def __init__(self, embed_dim: int, loss: nn.Module):
         super(DGIContrast, self).__init__()
         self.loss_func = loss
-        self.discriminator = Discriminator(h_dim)
+        self.discriminator = DGIDiscriminator(embed_dim)
 
     def forward(self, h1: torch.Tensor, h2: torch.Tensor) -> torch.Tensor:
         device = h1.device
