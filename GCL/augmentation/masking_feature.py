@@ -21,10 +21,9 @@ class MaskingFeatureAug(Augmentor):
 if __name__ == '__main__':
     feat_mask = FeatMask(0.5, ['feat'])
     g = dgl.rand_graph(10, 20)
-    g.ndata['feat'] = torch.randn(10, 5)
+    g.ndata['feat'] = torch.arange(40).view(10, -1)
 
-    for i in range(10):
-        new_g = feat_mask(deepcopy(g))
+    new_g = feat_mask(g)
 
-        print(new_g.ndata['feat'])
-        print(g.ndata['feat'])
+    print(new_g.ndata['feat'])
+    print(g.ndata['feat'])

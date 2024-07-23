@@ -15,9 +15,9 @@ class ShuffleNodeAug(Augmentor):
 
 
 if __name__ == '__main__':
-    g = dgl.rand_graph(20, 40)
-    g.ndata['feat'] = torch.arange(100).view(20, -1)
-    aug = ShuffleNodeAug()
+    g = dgl.rand_graph(10, 20)
+    g.ndata['feat'] = torch.arange(40).view(10, -1)
+    aug = NodeShuffle()
     new_g = aug(g)
-    print(g.ndata['feat'])
     print(new_g.ndata['feat'])
+    print(g.ndata['feat'])
