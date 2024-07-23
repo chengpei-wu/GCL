@@ -11,12 +11,13 @@ class DropEdgeAug(Augmentor):
         self.transform = DropEdge(prob)
 
     def augment(self, graph: dgl.DGLGraph) -> dgl.DGLGraph:
-        return dgl.add_self_loop(self.transform(graph))
+        return self.transform(graph)
 
 
 if __name__ == '__main__':
-    g = dgl.rand_graph(20, 40)
-    aug = DropEdgeAug(0.1)
-    new_g = aug(g)
-    print(torch.vstack([*new_g.edges()]), new_g.num_edges())
-    print(torch.vstack([*g.edges()]), g.num_edges())
+    graph = dgl.rand_graph(20, 40)
+    aug = DropEdgeAug(1)
+    for i in range(10):
+        new_g = aug(graph)
+        print(new_g.num_edges())
+        print(graph.num_edges())

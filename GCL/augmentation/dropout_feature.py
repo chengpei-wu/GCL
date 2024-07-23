@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import dgl
 import torch
 import torch.nn.functional as F
@@ -12,7 +14,7 @@ class DropoutFeatureAug(Augmentor):
         self.feature_field = feature_field
 
     def augment(self, graph: dgl.DGLGraph) -> dgl.DGLGraph:
-        g = graph.clone()
+        g = deepcopy(graph)
 
         features = g.ndata[self.feature_field]
 

@@ -29,14 +29,13 @@ class GracePipeline(nn.Module):
         self.contrast = GraceContrast(embed_dim=embed_dim, proj_dim=proj_dim, loss=InfoNCE(tau=tau))
 
     def forward(self, graph: dgl.DGLGraph, feat='feat'):
-        g1 = self.augmentor1(graph)
-        g2 = self.augmentor2(graph)
+        g1 = dgl.add_self_loop(self.augmentor1(graph))
+        g2 = dgl.add_self_loop(self.augmentor2(graph))
 
         h1 = self.encoder(g1, g1.ndata[feat])
         h2 = self.encoder(g2, g2.ndata[feat])
 
         loss = self.contrast(h1, h2)
-
         return loss
 
     def get_embedding(self, graph: dgl.DGLGraph, feat='feat'):
@@ -71,11 +70,13 @@ if __name__ == '__main__':
     embedding = Grace.get_embedding(g)
     print(embedding)
     evaluator = LREvaluator(measures=['macro_f1'])
+
     masks = {
         'train': g.ndata["train_mask"],
         'valid': g.ndata["val_mask"],
         'test':  g.ndata["test_mask"],
     }
+
     # masks = train_test_split(embedding.size(0), test_size=0.8)
     _, best_performance = evaluator(embedding, g.ndata["label"], masks=masks)
     print(best_performance)
