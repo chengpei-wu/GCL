@@ -8,7 +8,7 @@ from GCL.augmentation.masking_feature import MaskingFeatureAug
 from GCL.contrastive_loss.info_nce import InfoNCE
 from GCL.contrastive_manager.grace_contrast import GraceContrast
 from GCL.embedding_evaluator.evaluator import LREvaluator
-from GCL.nn.gcn_encoder import GCNEncoder
+from GCL.nn.encoder.gcn_encoder import GCNEncoder
 
 
 class GracePipeline(nn.Module):

@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from GCL.contrastive_loss.jsd import JSD
 from GCL.contrastive_manager.info_graph_contrast import InfoGraphContrast
-from GCL.nn.gin_encoder import GINEncoder
+from GCL.nn.encoder.gin_encoder import GINEncoder
 
 
 class InfoGraphPipeline(nn.Module):

@@ -6,7 +6,7 @@ from dgl.dataloading import GraphDataLoader
 
 from GCL.embedding_evaluator.evaluator import SVCEvaluator
 from GCL.embedding_evaluator.utils import train_test_split
-from GCL.nn.infograph_pipeline import InfoGraphPipeline
+from GCL.nn.pipeline.infograph_pipeline import InfoGraphPipeline
 
 
 if __name__ == '__main__':

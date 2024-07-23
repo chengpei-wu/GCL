@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from GCL.augmentation.shuffle_node import ShuffleNodeAug
 from GCL.contrastive_manager.dgi_contrast import DGIContrast
-from GCL.nn.gcn_encoder import GCNEncoder
+from GCL.nn.encoder.gcn_encoder import GCNEncoder
 
 
 class DGIPipeline(nn.Module):
