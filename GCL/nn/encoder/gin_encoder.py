@@ -23,25 +23,25 @@ class MLP(nn.Module):
 
 
 class GINEncoder(nn.Module):
-    def __init__(self, in_size, hid_size=32, num_layers=3, activation=F.relu, level='graph',
+    def __init__(self, in_size, embed_size=32, num_layers=3, activation=F.relu, level='both',
             pool: str = 'sum'):
         super(GINEncoder, self).__init__()
         self.gin_layers = nn.ModuleList()
         self.batch_norms = nn.ModuleList()
         self.rep_level = level
-        if self.rep_level == 'graph':
+        if self.rep_level in ['graph', 'both']:
             self.readout = readout_map(pool)
         self.num_layers = num_layers
         for layer in range(num_layers):
             if layer == 0:
-                mlp = MLP(in_size, hid_size, hid_size)
+                mlp = MLP(in_size, embed_size, embed_size)
             else:
-                mlp = MLP(hid_size, hid_size, hid_size)
+                mlp = MLP(embed_size, embed_size, embed_size)
 
             self.gin_layers.append(GINConv(mlp, aggregator_type='sum', activation=activation))
-            self.batch_norms.append(nn.BatchNorm1d(hid_size))
+            self.batch_norms.append(nn.BatchNorm1d(embed_size))
 
-    def forward(self, graph: dgl.DGLGraph, feats: torch.Tensor) -> tuple:
+    def forward(self, graph: dgl.DGLGraph, feats: torch.Tensor):
         h = feats
         hs = []
         for i in range(self.num_layers):
@@ -50,9 +50,15 @@ class GINEncoder(nn.Module):
             hs.append(h)
 
         node_h = torch.cat(hs, 1)
-        graph_h = self.readout(graph, node_h)
 
-        return graph_h, node_h
+        if self.rep_level == 'node':
+            return node_h
+        elif self.rep_level == 'graph':
+            return self.readout(graph, node_h)
+        elif self.rep_level == 'both':
+            return node_h, self.readout(graph, node_h)
+        else:
+            raise NotImplementedError(self.rep_level)
 
 
 if __name__ == "__main__":

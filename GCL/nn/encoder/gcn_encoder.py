@@ -13,7 +13,7 @@ class GCNEncoder(nn.Module):
         super(GCNEncoder, self).__init__()
         self.layers = nn.ModuleList()
         self.rep_level = level
-        if self.rep_level == 'graph':
+        if self.rep_level in ['graph', 'both']:
             self.readout = readout_map(pool)
 
         for i in range(num_layers):
@@ -30,14 +30,16 @@ class GCNEncoder(nn.Module):
                     )
                 )
 
-    def forward(self, graph: dgl.DGLGraph, feats: torch.Tensor) -> torch.Tensor:
+    def forward(self, graph: dgl.DGLGraph, feats: torch.Tensor, edge_weight=None):
         h = feats
         for layer in self.layers:
-            h = layer(graph, h)
+            h = layer(graph, h, edge_weight=edge_weight)
         if self.rep_level == 'node':
             return h
         elif self.rep_level == 'graph':
             return self.readout(graph, h)
+        elif self.rep_level == 'both':
+            return h, self.readout(graph, h)
         else:
             raise NotImplementedError(self.rep_level)
 
