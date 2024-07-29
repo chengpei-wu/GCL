@@ -2,7 +2,6 @@ from copy import deepcopy
 
 import dgl
 import dgl.sparse as dglsp
-import torch
 
 from GCL.augmentation.augmentor import Augmentor
 
@@ -35,10 +34,25 @@ class PersonalizedPageRankAug(Augmentor):
 
 
 if __name__ == '__main__':
-    g = dgl.rand_graph(10, 20)
-    g.ndata['feat'] = torch.randn((10, 20))
-    ppr = PersonalizedPageRankAug()
-    new_g = ppr(g)
-
-    print(g)
-    print(new_g)
+    ...
+    # def compute_ppr(graph: nx.Graph, alpha=0.2, self_loop=True):
+    #     a = nx.convert_matrix.to_numpy_array(graph)
+    #     if self_loop:
+    #         a = a + np.eye(a.shape[0])  # A^ = A + I_n
+    #     d = np.diag(np.sum(a, 1))  # D^ = Sigma A^_ii
+    #     dinv = fractional_matrix_power(d, -0.5)  # D^(-1/2)
+    #     at = np.matmul(np.matmul(dinv, a), dinv)  # A~ = D^(-1/2) x A^ x D^(-1/2)
+    #     return alpha * inv(
+    #         (np.eye(a.shape[0]) - (1 - alpha) * at)
+    #     )
+    #
+    #
+    # dataset = dgl.data.CoraGraphDataset()
+    # num_classes = dataset.num_classes
+    # g = dataset[0]
+    #
+    # g = dgl.to_networkx(g)
+    # lap = nx.normalized_laplacian_matrix(g)
+    # nx.normalized_laplacian_spectrum
+    # ppr = compute_ppr(g)
+    # print(ppr)

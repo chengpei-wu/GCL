@@ -3,22 +3,16 @@ import torch
 from sklearn.metrics import accuracy_score, fbeta_score, precision_score, recall_score, roc_auc_score
 
 
-def train_test_split(num_samples: int, test_size: float = 0.2, valid_size: float = 0.0) -> dict:
-    train_size = 1.0 - test_size - valid_size
+def train_test_split(num_samples: int, train_size: float = 0.1, test_size: float = 0.8):
+    assert train_size + test_size < 1
+    train_size = int(num_samples * train_size)
+    test_size = int(num_samples * test_size)
     indices = torch.randperm(num_samples)
-
-    num_train = int(train_size * num_samples)
-    num_test = int(test_size * num_samples)
-
-    train_mask = torch.zeros(num_samples, dtype=torch.bool)
-    val_mask = torch.zeros(num_samples, dtype=torch.bool)
-    test_mask = torch.zeros(num_samples, dtype=torch.bool)
-
-    train_mask[indices[:num_train]] = True
-    test_mask[indices[num_train:num_train + num_test]] = True
-    val_mask[indices[num_train + num_test:]] = True
-
-    return {'train': train_mask, 'test': test_mask, 'valid': val_mask}
+    return {
+        'train': indices[:train_size],
+        'valid': indices[train_size: test_size + train_size],
+        'test':  indices[test_size + train_size:]
+    }
 
 
 def score(y_pred: np.array, y_test: np.array, measure: str) -> float:

@@ -3,7 +3,14 @@ import torch
 import torch.nn as nn
 from dgl.nn.pytorch import SumPooling
 
-from GCL.contrastive_loss.jsd import JSD
+
+class MVGRLNodeDiscriminator(nn.Module):
+    def __init__(self, h_dim):
+        super(MVGRLNodeDiscriminator, self).__init__()
+        self.fn = nn.Bilinear(h_dim, h_dim, 1)
+
+    def forward(self, h, c):
+        return self.fn(h, c)
 
 
 class MVGRLDiscriminator(nn.Module):
@@ -28,23 +35,44 @@ class MVGRLDiscriminator(nn.Module):
 
 
 class MVGRLContrast(nn.Module):
-    def __init__(self, embed_dim: int, loss: nn.Module = JSD(), task_level='graph'):
+    def __init__(self, embed_dim: int, loss: nn.Module, task_level='graph'):
         super(MVGRLContrast, self).__init__()
         self.loss_func = loss
         self.local_discriminator = MVGRLDiscriminator(embed_dim)
         self.global_discriminator = MVGRLDiscriminator(embed_dim)
+        self.node_discriminator = MVGRLNodeDiscriminator(embed_dim)
         self.task_level = task_level
 
     def forward(self, *args) -> torch.Tensor:
         if self.task_level == 'graph':
             return self.forward_graph(*args)
         elif self.task_level == 'node':
-            return self.forward_node()
+            return self.forward_node(*args)
         else:
             raise NotImplementedError
 
-    def forward_node(self) -> torch.Tensor:
-        ...
+    def forward_node(self,
+            h1: torch.Tensor, h2: torch.Tensor, h3: torch.Tensor, h4: torch.Tensor,
+            g_h1: torch.Tensor, g_h2: torch.Tensor
+    ) -> torch.Tensor:
+        c_x1 = g_h1.expand_as(h1).contiguous()
+        c_x2 = g_h2.expand_as(h2).contiguous()
+
+        # positive
+        sc_1 = self.node_discriminator(h2, c_x1).squeeze(1)
+        sc_2 = self.node_discriminator(h1, c_x2).squeeze(1)
+
+        # negative
+        sc_3 = self.node_discriminator(h4, c_x1).squeeze(1)
+        sc_4 = self.node_discriminator(h3, c_x2).squeeze(1)
+
+        num_node = h1.size(0)
+        lbl1 = torch.ones(num_node * 2)
+        lbl2 = torch.zeros(num_node * 2)
+        labels = torch.cat((lbl1, lbl2)).to(h1.device)
+        logits = torch.cat((sc_1, sc_2, sc_3, sc_4))
+
+        return self.loss_func(logits, labels)
 
     def forward_graph(self, h1: torch.Tensor, h2: torch.Tensor, g_h1: torch.Tensor, g_h2: torch.Tensor,
             batch_graph_id: torch.Tensor) -> torch.Tensor:
@@ -76,21 +104,12 @@ class MVGRLContrast(nn.Module):
 
 
 if __name__ == '__main__':
-    from GCL.augmentation.personalized_page_rank import PersonalizedPageRankAug
-
     g1 = dgl.rand_graph(10, 20)
     g2 = dgl.rand_graph(10, 20)
-    batch_g = dgl.batch([g1, g2])
-    feats = torch.randn((20, 16))
+    feats = torch.randn((10, 16))
 
-    aug = PersonalizedPageRankAug()
-    diff_batch_g = aug(batch_g)
-
-    batch_graph_id = dgl.broadcast_nodes(batch_g, torch.arange(2))
-
-    print(batch_graph_id)
-    c = MVGRLContrast(16)
+    c = MVGRLContrast(16, loss=nn.BCEWithLogitsLoss(), task_level='node')
 
     readout = SumPooling()
-    loss = c(feats, feats, readout(batch_g, feats), readout(diff_batch_g, feats), batch_graph_id)
+    loss = c(feats, feats, feats, feats, readout(g1, feats), readout(g1, feats))
     print(loss)

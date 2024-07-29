@@ -17,9 +17,9 @@ if __name__ == '__main__':
     ).to(device)
 
     # train GRACE
-    optimizer = torch.optim.Adam(Grace.parameters(), lr=0.0005, weight_decay=1e-5)
+    optimizer = torch.optim.Adam(Grace.parameters(), lr=0.001, weight_decay=1e-5)
 
-    for epoch in range(300):
+    for epoch in range(1000):
         optimizer.zero_grad()
 
         loss = Grace(g)
@@ -32,14 +32,13 @@ if __name__ == '__main__':
     g = dgl.add_self_loop(g)
     embedding = Grace.get_embedding(g)
     print(embedding)
-    evaluator = LREvaluator(measures=['macro_f1'])
+    evaluator = LREvaluator(measures=['accuracy'])
 
     masks = {
         'train': g.ndata["train_mask"],
         'valid': g.ndata["val_mask"],
         'test':  g.ndata["test_mask"],
     }
-
-    # masks = train_test_split(embedding.size(0), test_size=0.8)
+    print(masks['train'].sum(), masks['valid'].sum(), masks['test'].sum())
     _, best_performance = evaluator(embedding, g.ndata["label"], masks=masks)
     print(best_performance)
